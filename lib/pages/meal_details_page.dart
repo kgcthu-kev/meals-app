@@ -52,25 +52,32 @@ class MealDetailsPage extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          Text(
-            'Steps',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          for (var i = 0; i < meal.steps.length; i++)
-            Column(children: [
-              Text('${i + 1}. ${meal.steps[i]}',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(children: [
+              Text(
+                'Steps',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold),
+              ),
               const SizedBox(
-                height: 15,
-              )
+                height: 10,
+              ),
+              for (var i = 0; i < meal.steps.length; i++)
+                Column(
+                  children: [
+                    Text('${i + 1}. ${meal.steps[i]}',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: Theme.of(context).colorScheme.onBackground)),
+                    const SizedBox(
+                      height: 15,
+                    )
+                  ],
+                ),
             ]),
+          ),
         ]),
       ),
     );

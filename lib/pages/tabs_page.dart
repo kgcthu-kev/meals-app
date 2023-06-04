@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:mealapp/data/dummy_data.dart';
 import 'package:mealapp/models/meal.dart';
+import 'package:mealapp/pages/filters.dart';
 import 'package:mealapp/pages/home_page.dart';
 import 'package:mealapp/pages/meals_page.dart';
 import 'package:mealapp/widgets/main_drawer.dart';
+
+// default initial filters
+const kInitialFilters = {
+  Filter.glutenFree: false,
+  Filter.latoseFree: false,
+  Filter.vegan: false,
+  Filter.vegetables: false
+};
 
 class TabsPage extends StatefulWidget {
   const TabsPage({super.key});
@@ -12,9 +22,15 @@ class TabsPage extends StatefulWidget {
 }
 
 class _TabsPageState extends State<TabsPage> {
-  var activePageTitle = 'Pick your category';
   int _selectedPageIndex = 0;
   final List<Meal> _favoriteMeals = [];
+  // we will change this selectedFilter based on user input
+  Map<Filter, bool> _selectedFilter = {
+    Filter.glutenFree: false,
+    Filter.latoseFree: false,
+    Filter.vegan: false,
+    Filter.vegetables: false
+  };
 
   void _showInfoMessage(String text) {
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -42,12 +58,42 @@ class _TabsPageState extends State<TabsPage> {
     });
   }
 
+  void _selectTab(String identifier) async {
+    Navigator.of(context).pop();
+    if (identifier == 'filters') {
+      // only when user navigate back, we can recieve data.
+      final result =
+          await Navigator.of(context).push<Map<Filter, bool>>(MaterialPageRoute(
+              builder: (ctx) => FiltersPage(
+                    currentFilters: _selectedFilter,
+                  )));
+      setState(() {
+        _selectedFilter = result ?? kInitialFilters;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final availableMeals = dummyMeals.where((meal) {
+      if (_selectedFilter[Filter.glutenFree]! && !meal.isGlutenFree) {
+        return false;
+      }
+      if (_selectedFilter[Filter.latoseFree]! && !meal.isLactoseFree) {
+        return false;
+      }
+      if (_selectedFilter[Filter.vegan]! && !meal.isVegan) {
+        return false;
+      }
+      if (_selectedFilter[Filter.vegetables]! && !meal.isVegetarian) {
+        return false;
+      }
+      return true;
+    }).toList();
     String activePageTitle = 'Pick your category';
     Widget activePage = HomePage(
-      onToggleFavorite: _toggleMealFavoriteStatus,
-    );
+        onToggleFavorite: _toggleMealFavoriteStatus,
+        availableMeals: availableMeals);
 
     if (_selectedPageIndex == 1) {
       activePageTitle = 'Your favorites';
@@ -57,7 +103,7 @@ class _TabsPageState extends State<TabsPage> {
       );
     }
     return Scaffold(
-      drawer: const MainDrawer(),
+      drawer: MainDrawer(onSelect: _selectTab),
       appBar: AppBar(title: Text(activePageTitle)),
       body: activePage,
       bottomNavigationBar: BottomNavigationBar(items: const [
